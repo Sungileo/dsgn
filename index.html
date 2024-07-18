@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마우스 조명 효과와 다색 정사각형</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #262626;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .light {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .squares-container {
+            display: grid;
+            grid-template-columns: repeat(2, 300px);
+            grid-gap: 20px;
+            position: relative;
+            width: 620px;
+            height: 620px;
+        }
+        
+        .square {
+            width: 300px;
+            height: 300px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+        }
+        .square_1 { background-color: #c0c0c0; top: 0; left: 0; }
+        .square_2 { background-color: #4c4c4c; top: 0; right: 0; }
+        .square_3 { background-color: #606060; bottom: 0; left: 0; }
+        .square_4 { background-color: #999999; bottom: 0; right: 0; }
+
+        .expanded {
+            width: 620px;
+            height: 620px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="squares-container">
+        <div class="square square_1"></div>
+        <div class="square square_2"></div>
+        <div class="square square_3"></div>
+        <div class="square square_4"></div>
+    </div>
+
+    <script>
+        // 조명 효과 코드는 그대로 유지
+        const lights = [];
+        const numLights = 5;
+
+        for (let i = 0; i < numLights; i++) {
+            const light = document.createElement('div');
+            light.className = 'light';
+            light.style.opacity = 1 - (i / numLights);
+            document.body.appendChild(light);
+            lights.push({ element: light, x: 0, y: 0 });
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            lights[0].x = e.clientX;
+            lights[0].y = e.clientY;
+        });
+
+        function animate() {
+            for (let i = lights.length - 1; i > 0; i--) {
+                const speed = 0.1 + ((numLights - i) * 0.05);
+                lights[i].x += (lights[i-1].x - lights[i].x) * speed;
+                lights[i].y += (lights[i-1].y - lights[i].y) * speed;
+                lights[i].element.style.left = lights[i].x + 'px';
+                lights[i].element.style.top = lights[i].y + 'px';
+            }
+
+            lights[0].element.style.left = lights[0].x + 'px';
+            lights[0].element.style.top = lights[0].y + 'px';
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // 정사각형 확대 및 축소 기능
+        const squares = document.querySelectorAll('.square');
+        let expandedSquare = null;
+
+        squares.forEach(square => {
+            square.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (expandedSquare) {
+                    if (expandedSquare === square) {
+                        shrinkSquare(square);
+                    } else {
+                        shrinkSquare(expandedSquare);
+                        expandSquare(square);
+                    }
+                } else {
+                    expandSquare(square);
+                }
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (expandedSquare && !expandedSquare.contains(e.target)) {
+                shrinkSquare(expandedSquare);
+            }
+        });
+
+        function expandSquare(square) {
+            square.style.zIndex = '10';
+            square.classList.add('expanded');
+            expandedSquare = square;
+        }
+
+        function shrinkSquare(square) {
+            square.style.zIndex = '10';
+            square.classList.remove('expanded');
+            setTimeout(() => {
+                square.style.zIndex = '';
+                expandedSquare = null;
+            }, 300); // 트랜지션 시간과 동일하게 설정
+        }
+    </script>
+</body>
+</html>
