@@ -8,7 +8,7 @@
         body {
             margin: 0;
             height: 100vh;
-            background-color: grey60;
+            background-color: #787c82;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -30,6 +30,19 @@
             position: relative;
             width: 620px;
             height: 620px;
+        }
+ 
+        @keyframes vibrate {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .square:hover:not(.expanded) {
+            animation: vibrate 0.3s linear infinite;
         }
         
         .square {
@@ -107,7 +120,8 @@
 
         // animate();
 
-        // 정사각형 확대 및 축소 기능
+        // 정사각형 확대 및 축소, 진동 기능
+
         const squares = document.querySelectorAll('.square');
         let expandedSquare = null;
 
@@ -125,6 +139,18 @@
                     expandSquare(square);
                 }
             });
+
+        // 마우스 enter 이벤트 리스너 추가
+        square.addEventListener('mouseenter', () => {
+            if (!square.classList.contains('expanded')) {
+                square.style.animation = 'vibrate 0.3s linear infinite';
+            }
+        });
+
+            // 마우스 leave 이벤트 리스너 추가
+            square.addEventListener('mouseleave', () => {
+                square.style.animation = 'none';
+            });
         });
 
         document.addEventListener('click', (e) => {
@@ -136,6 +162,7 @@
         function expandSquare(square) {
             square.style.zIndex = '10';
             square.classList.add('expanded');
+            square.style.animation = 'none'; // 확장 시 진동 중지
             expandedSquare = square;
         }
 
@@ -145,7 +172,7 @@
             setTimeout(() => {
                 square.style.zIndex = '';
                 expandedSquare = null;
-            }, 300); // 트랜지션 시간과 동일하게 설정
+            }, 300);
         }
     </script>
 </body>
